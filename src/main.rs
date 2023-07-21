@@ -1,9 +1,14 @@
+#![allow(dead_code)]
+
 mod evaluation;
 mod constants;
+mod move_generation;
 
 use std::collections::HashMap;
 use constants::Pieces;
-use evaluation::score_board;
+//use evaluation::score_board;
+//use move_generation::Move;
+use rand::Rng;
 
 
 
@@ -48,6 +53,7 @@ fn print_board(board: [u8; 64]) {
     if file == 8 {
       print!("\n");
       if rank == 0 {
+        print!("\n");
         break;
       }
       rank -=1;
@@ -85,13 +91,44 @@ fn print_board(board: [u8; 64]) {
 fn main() {
   let starting = "rnbqkbnr/ppqppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
-  let board: [u8; 64] = parse_fen(starting);
+  let mut board: [u8; 64] = parse_fen(starting);
+  let mut rng = rand::thread_rng();
 
   print_board(board);
   
-  let b_score = score_board(board, Pieces::BLACK);
-  println!("{0}",b_score);
+  // let b_score = score_board(board, Pieces::BLACK);
+  // println!("{0}",b_score);
 
-  let w_score = score_board(board, Pieces::WHITE);
-  println!("{0}",w_score);
+  // let w_score = score_board(board, Pieces::WHITE);
+  // println!("{0}",w_score);
+
+  for _i in 0..50 {
+    let move_white = move_generation::generate_moves(board, Pieces::WHITE);
+    if move_white.len() == 0 {
+      break;
+    }
+
+    let picked = &move_white[rng.gen_range(0..move_white.len())];
+    let temp = board[picked.start as usize];
+    board[picked.start as usize] = Pieces::NONE;
+    board[picked.target as usize] = temp;
+
+    //print_board(board);
+
+    let move_black = move_generation::generate_moves(board, Pieces::BLACK);
+
+    if move_black.len() == 0 {
+      break;
+    }
+
+    let picked = &move_black[rng.gen_range(0..move_black.len())];
+    let temp = board[picked.start as usize];
+    board[picked.start as usize] = Pieces::NONE;
+    board[picked.target as usize] = temp;
+
+    //print_board(board)
+  }
+
+  print_board(board);
+
 }
