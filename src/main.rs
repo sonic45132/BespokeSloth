@@ -1,36 +1,17 @@
+mod evaluation;
+mod constants;
+
 use std::collections::HashMap;
-
-#[derive(Copy, Clone, PartialEq)]
-enum Pieces {
-    None,
-    King,
-    Pawn,
-    Knight,
-    Bishop,
-    Rook,
-    Queen
-}
-#[derive(Copy, Clone, PartialEq)]
-enum Colors {
-  White,
-  Black
-}
-
-#[derive(Copy, Clone)]
-struct Square{
-  piece: Pieces,
-  color: Colors
-}
+use constants::Pieces;
+use evaluation::score_board;
 
 
-fn parse_fen(input: &str) -> [Square; 64] {
-  let hash = HashMap::from([('k',Pieces::King), ('n', Pieces::Knight), ('p', Pieces::Pawn), 
-                            ('b', Pieces::Bishop), ('r', Pieces::Rook), ('q', Pieces::Queen),
-                            ('K',Pieces::King), ('N', Pieces::Knight), ('P', Pieces::Pawn), 
-                            ('B', Pieces::Bishop), ('R', Pieces::Rook), ('Q', Pieces::Queen)]);
 
-  let mut board: [Square; 64] = [Square{piece: Pieces::None, color: Colors::Black};64];
+fn parse_fen(input: &str) -> [u8; 64] {
+  let hash = HashMap::from([('k',Pieces::KING), ('n', Pieces::KNIGHT), ('p', Pieces::PAWN), 
+                            ('b', Pieces::BISHOP), ('r', Pieces::ROOK), ('q', Pieces::QUEEN)]);
 
+  let mut board: [u8; 64] = [0;64];
   let mut file: usize = 0;
   let mut rank: usize = 7;
 
@@ -42,14 +23,15 @@ fn parse_fen(input: &str) -> [Square; 64] {
       if c.is_digit(10) {
         file += c.to_digit(10).unwrap_or(0) as usize;
       } else {
+        let lower = c.to_lowercase().last().unwrap_or('p');
         if c.is_uppercase() {
-          let piece = hash[&c];
-          let color = Colors::White;
-          board[rank*8+file] = Square {piece, color};
+          let piece = hash[&lower];
+          let color = Pieces::WHITE;
+          board[rank*8+file] = (color|piece) as u8;
         } else {
-          let piece = hash[&c];
-          let color = Colors::Black;
-          board[rank*8+file] = Square {piece, color};
+          let piece = hash[&lower];
+          let color = Pieces::BLACK;
+          board[rank*8+file] = (color|piece) as u8;
         }
         file += 1;
       }
@@ -58,7 +40,7 @@ fn parse_fen(input: &str) -> [Square; 64] {
   return board;
 }
 
-fn print_board(board: [Square; 64]) {
+fn print_board(board: [u8; 64]) {
   let mut file: usize = 0;
   let mut rank: usize = 7;
 
@@ -73,19 +55,23 @@ fn print_board(board: [Square; 64]) {
     }
 
 
-    let current: Square = board[rank*8+file];
+    let current = board[rank*8+file];
     let letter: char;
 
-    match current.piece {
-      Pieces::Pawn => letter = 'p',
-      Pieces::Rook => letter = 'r',
-      Pieces::King => letter = 'k',
-      Pieces::Queen => letter = 'q',
-      Pieces::Bishop => letter = 'b',
-      Pieces::Knight => letter = 'n',
-      Pieces::None => letter = '-'
+    let piece = current & 0b00111;
+    let color = current & 0b11000;
+
+    match piece {
+      Pieces::PAWN => letter = 'p',
+      Pieces::ROOK => letter = 'r',
+      Pieces::KING => letter = 'k',
+      Pieces::QUEEN => letter = 'q',
+      Pieces::BISHOP => letter = 'b',
+      Pieces::KNIGHT => letter = 'n',
+      Pieces::NONE => letter = '-',
+      _ => letter = '-'
     }
-    if current.color == Colors::White {
+    if color == Pieces::WHITE {
       print!("{}", letter.to_uppercase());
     } else {
       print!("{}", letter);
@@ -97,10 +83,15 @@ fn print_board(board: [Square; 64]) {
 
 
 fn main() {
-  let starting = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+  let starting = "rnbqkbnr/ppqppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
-  let mut board: [Square; 64] = parse_fen(starting);
+  let board: [u8; 64] = parse_fen(starting);
 
   print_board(board);
+  
+  let b_score = score_board(board, Pieces::BLACK);
+  println!("{0}",b_score);
 
+  let w_score = score_board(board, Pieces::WHITE);
+  println!("{0}",w_score);
 }
