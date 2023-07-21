@@ -1,0 +1,1 @@
+A bad attempt at a rust based uci-compliant chess engine.
