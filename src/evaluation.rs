@@ -8,12 +8,13 @@ pub fn score_board(board: [u8;64], side: u8) -> i32 {
 
   for square in board {
     if square != 0 {
+      let tside = (square>>4) as usize;
       match square&0b00111 {
-        Pieces::PAWN => totals[(square>>4) as usize] += Values::PAWN,
-        Pieces::KNIGHT => totals[(square>>4) as usize] += Values::KNIGHT,
-        Pieces::BISHOP => totals[(square>>4) as usize] += Values::BISHOP,
-        Pieces::ROOK => totals[(square>>4) as usize] += Values::ROOK,
-        Pieces::QUEEN => totals[(square>>4) as usize] += Values::QUEEN,
+        Pieces::PAWN => totals[tside] += Values::PAWN,
+        Pieces::KNIGHT => totals[tside] += Values::KNIGHT,
+        Pieces::BISHOP => totals[tside] += Values::BISHOP,
+        Pieces::ROOK => totals[tside] += Values::ROOK,
+        Pieces::QUEEN => totals[tside] += Values::QUEEN,
         _ => ()
       }
     }
