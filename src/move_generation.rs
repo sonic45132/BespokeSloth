@@ -17,6 +17,7 @@ pub fn generate_moves(board: [u8;64], side: u8) -> Vec<Move> {
 
     match square&0b00111 {
       Pieces::PAWN => moves.extend(pawn_moves(board, side, i as u8)),
+      Pieces::KING => moves.extend(king_moves(board, side, i as u8)),
       _ => ()
     }
 
@@ -25,6 +26,7 @@ pub fn generate_moves(board: [u8;64], side: u8) -> Vec<Move> {
   moves
 }
 
+//TODO: Cleanup type casts if possible
 fn pawn_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
 
   if loc > 64 {
@@ -59,7 +61,7 @@ fn pawn_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
         });
       }
     } else {
-      if loc/7 == 1 && board[index2] == 0 {
+      if loc/8 == 7 && board[index2] == 0 {
         moves.push(Move {
           start: loc as u8,
           target: (loc as i32+(offset*2)) as u8
@@ -92,6 +94,30 @@ fn pawn_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
   }
 
 
+
+  moves
+}
+
+fn king_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
+
+  let mut moves: Vec<Move> = Vec::new();
+
+  let offsets = [-8,-1,1,8];
+
+  for offset in offsets {
+    let cur_pos = loc as i32;
+    if cur_pos + offset > 63 || cur_pos + offset < 0 { continue; }
+    if offset.abs() == 1 && (cur_pos + offset)/8  != cur_pos/8 { continue; }
+
+    let index = (cur_pos+offset) as usize;
+    if board[index]&side != 1 {
+      moves.push(Move {
+        start: loc,
+        target: index as u8
+      });
+    }
+
+  }
 
   moves
 }
