@@ -13,15 +13,15 @@ pub fn generate_moves(board: [u8;64], side: u8) -> Vec<Move> {
 
 	for i in 0..64 {
 		let square = board[i];
-		if square&side ==0 { continue; }
+		if square&side == 0 { continue; }
 
 		match square&0b00111 {
 			Pieces::PAWN => moves.extend(pawn_moves(board, side, i as u8)),
 			Pieces::KING => moves.extend(king_moves(board, side, i as u8)),
 			Pieces::KNIGHT => moves.extend(knight_moves(board, side, i as u8)),
-			Pieces::ROOK => moves.extend(rook_moves(board, side, i as u8)),
-			Pieces::BISHOP => moves.extend(bishop_moves(board, side, i as u8)),
-			Pieces::QUEEN => moves.extend(queen_moves(board, side, i as u8)),
+			Pieces::ROOK => moves.extend(slide_moves(board, side, i as u8, Pieces::ROOK)),
+			Pieces::BISHOP => moves.extend(slide_moves(board, side, i as u8, Pieces::BISHOP)),
+			Pieces::QUEEN => moves.extend(slide_moves(board, side, i as u8, Pieces::QUEEN)),
 			_ => ()
 		}
 
@@ -40,14 +40,22 @@ fn pawn_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
 
 	let mut moves: Vec<Move> = Vec::new();
 
-	let mut offset: i32 = 8;
-	if side == Pieces::BLACK { offset = -8; }
+	
+	let offset;
 
-	let index = (cur_pos+offset) as usize;
+	if side == Pieces::WHITE {
+		offset = 8;
+	} else {
+		offset = -8;
+	}
 
-	if index > 63 {
+	let target = cur_pos+offset;
+
+	if target > 63 || target < 0 {
 		return moves;
 	}
+
+	let index = target as usize;
 
 	//Generate normal pawn move 1 space
 	if board[index] == 0 {
@@ -113,7 +121,7 @@ fn king_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
 		if offset.abs() == 1 && (cur_pos + offset)/8  != cur_pos/8 { continue; }
 
 		let index = (cur_pos+offset) as usize;
-		if board[index]&side != 1 {
+		if board[index]&side == 0 {
 			moves.push(Move {
 				start: loc,
 				target: index as u8
@@ -141,10 +149,10 @@ fn knight_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
 		let c_rank = cur_pos/8;
 		let r_diff = (t_rank-c_rank).abs();
 		if (offset < -14 || offset > 14) && r_diff != 2 { continue; }
-		if (offset > -14 || offset < 14) && r_diff != 1 { continue; }
+		if (offset > -14 && offset < 14) && r_diff != 1 { continue; }
 		
 		let index = (cur_pos+offset) as usize;
-		if board[index]&side != 1 {
+		if board[index]&side == 0 {
 			moves.push(Move {
 				start: loc,
 				target: index as u8
@@ -153,15 +161,24 @@ fn knight_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
 
 	}
 
+	//println!("{:?}",moves);
+
 	moves
 }
 
-fn rook_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
+fn slide_moves(board: [u8;64], side: u8, loc: u8, piece: u8) -> Vec<Move> {
 
 	let mut moves: Vec<Move> = Vec::new();
 	let cur_pos = loc as i32;
 
-	let dirs = [-8,-1,1,8];
+	let dirs: Vec<i32>;
+
+	match piece {
+		Pieces::QUEEN => dirs = vec![-9,-8,-7,-1,1,7,8,9],
+		Pieces::ROOK => dirs = vec![-8,-1,1,8],
+		Pieces::BISHOP => dirs = vec![-9,-7,7,9],
+		_ => dirs = Vec::new()
+	}
 	
 	for dir in dirs {
 		let mut i = 1;
@@ -171,18 +188,25 @@ fn rook_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
 			let t_rank = target/8;
 			let c_rank = (cur_pos + (dir*(i-1)))/8;
 			let r_diff = (t_rank-c_rank).abs();
-			if (dir > -7 || dir < 7) && r_diff != 0 { break; }
+			//println!("target: {}", target);
+			//println!("Rdiff: {}", r_diff);
+			if (dir < -6 || dir > 6) && r_diff != 1 { break; }
+			if (dir > -6 && dir < 6) && r_diff != 0 { break; }
 
 			let index = target as usize;
-			if board[index] != 0  && board[index]&side != 1 {
+
+			if board[index] != 0  && board[index]&side == 0 {
+				//println!("Enemy in way");
 				moves.push(Move {
 					start: loc,
 					target: target as u8
 				});
 				break;
-			} else if board[index]&side == 1{
+			} else if board[index]&side != 0 {
+				//println!("Friend in way");
 				break;
 			} else {
+				//println!("Free spacee a head");
 				moves.push(Move {
 					start: loc,
 					target: target as u8
@@ -192,90 +216,10 @@ fn rook_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
 			i += 1;
 
 		}
+
 	}
 
-	moves
-}
-
-fn bishop_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
-
-	let mut moves: Vec<Move> = Vec::new();
-	let cur_pos = loc as i32;
-
-	let dirs = [-9,-7,7,9];
-	
-	for dir in dirs {
-		let mut i = 1;
-		loop {
-			let target = cur_pos + (dir*i);
-			if target > 63 || target < 0 { break; }
-			let t_rank = target/8;
-			let c_rank = (cur_pos + (dir*(i-1)))/8;
-			let r_diff = (t_rank-c_rank).abs();
-			if r_diff != 1 { break; }
-
-			let index = target as usize;
-			if board[index] != 0  && board[index]&side != 1 {
-				moves.push(Move {
-					start: loc,
-					target: target as u8
-				});
-				break;
-			} else if board[index]&side == 1{
-				break;
-			} else {
-				moves.push(Move {
-					start: loc,
-					target: target as u8
-				});
-			}
-
-			i += 1;
-
-		}
-	}
-
-	moves
-}
-
-fn queen_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
-
-	let mut moves: Vec<Move> = Vec::new();
-	let cur_pos = loc as i32;
-
-	let dirs = [-9,-8,-7,-1,1,7,8,9];
-	
-	for dir in dirs {
-		let mut i = 1;
-		loop {
-			let target = cur_pos + (dir*i);
-			if target > 63 || target < 0 { break; }
-			let t_rank = target/8;
-			let c_rank = (cur_pos + (dir*(i-1)))/8;
-			let r_diff = (t_rank-c_rank).abs();
-			if (dir < -6 || dir > 6) && r_diff != 1 { continue; }
-			if (dir > -6 || dir < 6) && r_diff != 0 { continue; }
-
-			let index = target as usize;
-			if board[index] != 0  && board[index]&side != 1 {
-				moves.push(Move {
-					start: loc,
-					target: target as u8
-				});
-				break;
-			} else if board[index]&side == 1{
-				break;
-			} else {
-				moves.push(Move {
-					start: loc,
-					target: target as u8
-				});
-			}
-
-			i += 1;
-
-		}
-	}
+	//println!("{:?}",moves);
 
 	moves
 }
