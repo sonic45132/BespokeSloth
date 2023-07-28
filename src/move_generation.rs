@@ -27,19 +27,20 @@ pub fn generate_moves(board: [u8;64], side: u8) -> Vec<Move> {
 	moves
 }
 
-//TODO: Cleanup type casts if possible
 fn pawn_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
 
 	if loc > 64 {
 		return Vec::new();
 	}
 
+	let cur_pos = loc as i32;
+
 	let mut moves: Vec<Move> = Vec::new();
 
 	let mut offset: i32 = 8;
 	if side == Pieces::BLACK { offset = -8; }
 
-	let index = (loc as i32+offset) as usize;
+	let index = (cur_pos+offset) as usize;
 
 	if index > 63 {
 		return moves;
@@ -49,23 +50,23 @@ fn pawn_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
 	if board[index] == 0 {
 		moves.push(Move {
 			start: loc as u8,
-			target: (loc as i32+offset) as u8
+			target: (cur_pos+offset) as u8
 		});
 
 		//Generate starting pawn move of 2 spaces if on correct rank
-		let index2 = (loc as i32+(offset*2)) as usize;
+		let index2 = (cur_pos+(offset*2)) as usize;
 		if side == Pieces::WHITE {
 			if loc/8 == 1 && board[index2] == 0 {
 				moves.push(Move {
 					start: loc as u8,
-					target: (loc as i32+(offset*2)) as u8
+					target: (cur_pos+(offset*2)) as u8
 				});
 			}
 		} else {
 			if loc/8 == 7 && board[index2] == 0 {
 				moves.push(Move {
 					start: loc as u8,
-					target: (loc as i32+(offset*2)) as u8
+					target: (cur_pos+(offset*2)) as u8
 				});
 			}
 		}
