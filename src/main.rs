@@ -6,9 +6,9 @@ mod move_generation;
 
 use std::collections::HashMap;
 use constants::Pieces;
-//use evaluation::score_board;
+use evaluation::score_board;
 use move_generation::Move;
-//use rand::Rng;
+use rand::Rng;
 use std::io;
 
 
@@ -102,62 +102,116 @@ fn read_line() -> String {
 	input
 }
 
-fn to_alg(play: Move) -> String {
+fn to_alg(play: &Move) -> String {
 
-	
+	let mut alg = String::new();
 
-	String::new()
+	let alf = ['A','B','C','D','E','F','G','H'];
+
+	let s_letter = alf[(play.start%8) as usize];
+	let s_num = char::from_digit((play.start as u32/8)+1, 10).unwrap_or('0');
+
+	alg.push(s_letter);
+	alg.push(s_num);
+
+	let t_letter = alf[(play.target%8) as usize];
+	let t_num = char::from_digit((play.target as u32/8)+1, 10).unwrap_or('0');
+
+	alg.push(t_letter);
+	alg.push(t_num);
+
+	alg
 }
 
 fn from_alg(play: String) -> Move {
 
+	let mut s_index = 0;
+	let mut t_index = 0;
+
+	let alf = ['a','b','c','d','e','f','g','h'];
+
 	for (i, x) in play.chars().enumerate() {
 		if i < 2 {
-
+			if x.is_numeric() {
+				s_index += (x.to_digit(10).unwrap_or(0)-1)*8;
+			} else {
+				s_index += alf.iter().position(|&r| r == x).unwrap() as u32;
+			}
+		} else {
+			if x.is_numeric() {
+				t_index += (x.to_digit(10).unwrap_or(0)-1)*8;
+			} else {
+				t_index += alf.iter().position(|&r| r == x).unwrap() as u32;
+			}
 		}
 	}
 
 	Move {
-		start: 0,
-		target: 0
+		start: s_index as u8,
+		target: t_index as u8
 	}
 }
 
 
 fn main() {
-	let starting = "rnbqkbnr/ppqppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+	let starting = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
-	let mut _board: [u8; 64] = parse_fen(starting);
+	let mut board: [u8; 64] = parse_fen(starting);
 
 
-	let mut input = read_line();
+	let mut input;
 
-	if input != "uci" { panic!("Wrong start"); }
-	println!("id name BespokeSloth");
-	println!("id author neonstatic");
-	println!("uciok");
+	loop {
+		let mut rng = rand::thread_rng();
+		input = read_line();
+		let w_move = from_alg(input);
 
-	input = read_line();
-	if input != "isready" { panic!("Not ready"); }
-	println!("readyok");
+		//println!("{:?}", w_move);
 
-	input = read_line();
-	if input != "ucinewgame" { panic!("no new game"); }
+		let temp = board[w_move.start as usize];
+		board[w_move.start as usize] = Pieces::NONE;
+		board[w_move.target as usize] = temp;
 
-	input = read_line();
-	if !input.contains("position startpos") { panic!("bad position"); }
-	let parts = input.split(" ");
+		print_board(board);
+
+		let moves = move_generation::generate_moves(board, Pieces::BLACK);
+
+		let picked = &moves[rng.gen_range(0..moves.len())];
+	  println!("Picked move: {}", to_alg(picked));
+	  println!("{:?}",picked);
+	  let temp = board[picked.start as usize];
+	  board[picked.start as usize] = Pieces::NONE;
+	  board[picked.target as usize] = temp;
+
+	  print_board(board);
+	}
+
+	// if input != "uci" { panic!("Wrong start"); }
+	// println!("id name BespokeSloth");
+	// println!("id author neonstatic");
+	// println!("uciok");
+
+	// input = read_line();
+	// if input != "isready" { panic!("Not ready"); }
+	// println!("readyok");
+
+	// input = read_line();
+	// if input != "ucinewgame" { panic!("no new game"); }
+
+	// input = read_line();
+	// if !input.contains("position startpos") { panic!("bad position"); }
+	// let parts = input.split(" ");
 
 	
 
-	while input != "quit" {
-		input = read_line();
-		println!("{0}", input);
-	}
+	// while input != "quit" {
+	// 	input = read_line();
+	// 	println!("{0}", input);
+	// }
 
-	//let mut rng = rand::thread_rng();
+	// let mut rng = rand::thread_rng();
 
-	//print_board(board);
+	// print_board(board);
 	
 	// let b_score = score_board(board, Pieces::BLACK);
 	// println!("{0}",b_score);
@@ -168,19 +222,23 @@ fn main() {
 	// let mut side: u8;
 	// let mut oom = false;
 
-	// for _i in 0..1000 {
-	//   if _i%2 ==0 {
+	// for i in 0..30 {
+	//   if i%2 ==0 {
 	//     side = Pieces::WHITE;
+	//     println!("Side to go: White");
 	//   } else {
 	//     side = Pieces::BLACK;
+	//     println!("Side to go: Black");
 	//   }
 
 	//   let moves = move_generation::generate_moves(board, side);
+	//   //println!("{:?}",moves);
 	//   if moves.len() == 0 {
 	//     if oom { 
-	//       println!("Got to {0} moves before end.", _i);
+	//       println!("Got to {0} moves before end.", i);
 	//       break; 
 	//     }
+	//     println!("No moves");
 	//     oom = true;
 	//     continue;
 	//   } else {
@@ -188,11 +246,13 @@ fn main() {
 	//   }
 
 	//   let picked = &moves[rng.gen_range(0..moves.len())];
+	//   print!("Picked move: ");
+	//   println!("{:?}",picked);
 	//   let temp = board[picked.start as usize];
 	//   board[picked.start as usize] = Pieces::NONE;
 	//   board[picked.target as usize] = temp;
-	// }
 
-	// print_board(board);
+	//   print_board(board);
+	// }
 
 }
