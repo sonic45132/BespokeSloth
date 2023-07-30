@@ -11,6 +11,12 @@ use move_generation::Move;
 use rand::Rng;
 use std::io;
 
+struct State {
+	board: [u8; 64],
+	to_move: u8,
+	moves_made: u32,
+}
+
 
 
 fn parse_fen(input: &str) -> [u8; 64] {
@@ -156,7 +162,11 @@ fn from_alg(play: String) -> Move {
 fn main() {
 	let starting = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
-	let mut board: [u8; 64] = parse_fen(starting);
+	let mut state = State {
+		board: parse_fen(starting),
+		to_move: Pieces::WHITE,
+		moves_made: 0
+	};
 
 
 	let mut input;
@@ -168,22 +178,22 @@ fn main() {
 
 		//println!("{:?}", w_move);
 
-		let temp = board[w_move.start as usize];
-		board[w_move.start as usize] = Pieces::NONE;
-		board[w_move.target as usize] = temp;
+		let temp = state.board[w_move.start as usize];
+		state.board[w_move.start as usize] = Pieces::NONE;
+		state.board[w_move.target as usize] = temp;
 
-		print_board(board);
+		print_board(state.board);
 
-		let moves = move_generation::generate_moves(board, Pieces::BLACK);
+		let moves = move_generation::generate_moves(state.board, Pieces::BLACK);
 
 		let picked = &moves[rng.gen_range(0..moves.len())];
 	  println!("Picked move: {}", to_alg(picked));
 	  println!("{:?}",picked);
-	  let temp = board[picked.start as usize];
-	  board[picked.start as usize] = Pieces::NONE;
-	  board[picked.target as usize] = temp;
+	  let temp = state.board[picked.start as usize];
+	  state.board[picked.start as usize] = Pieces::NONE;
+	  state.board[picked.target as usize] = temp;
 
-	  print_board(board);
+	  print_board(state.board);
 	}
 
 	// if input != "uci" { panic!("Wrong start"); }
