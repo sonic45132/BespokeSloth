@@ -1,0 +1,10 @@
+King Protection (Own side)
+- Castled positions worth more
+  - Have to figure out of castliong is possible. Has king moved already?
+- Pawn wall
+  - 3 pawns closest to the king in a line?
+- Lower rewards for previous as game moves forward?
+
+Mobility
+- Favor squares where pieces have more moves?
+  - ex. keep knights out of corners or off sides?
