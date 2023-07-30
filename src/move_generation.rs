@@ -32,10 +32,6 @@ pub fn generate_moves(board: [u8;64], side: u8) -> Vec<Move> {
 
 fn pawn_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
 
-	if loc > 64 {
-		return Vec::new();
-	}
-
 	let cur_pos = loc as i32;
 
 	let mut moves: Vec<Move> = Vec::new();
@@ -188,8 +184,6 @@ fn slide_moves(board: [u8;64], side: u8, loc: u8, piece: u8) -> Vec<Move> {
 			let t_rank = target/8;
 			let c_rank = (cur_pos + (dir*(i-1)))/8;
 			let r_diff = (t_rank-c_rank).abs();
-			//println!("target: {}", target);
-			//println!("Rdiff: {}", r_diff);
 			if (dir < -6 || dir > 6) && r_diff != 1 { break; }
 			if (dir > -6 && dir < 6) && r_diff != 0 { break; }
 
