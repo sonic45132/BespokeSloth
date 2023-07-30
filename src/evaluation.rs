@@ -22,5 +22,7 @@ pub fn score_board(board: [u8;64], side: u8) -> i32 {
 
 	let first = side >> 4;
 	let score = totals[first as usize] - totals[(1-first) as usize];
+
 	score
+
 }

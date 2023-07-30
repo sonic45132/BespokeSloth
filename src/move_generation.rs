@@ -190,17 +190,14 @@ fn slide_moves(board: [u8;64], side: u8, loc: u8, piece: u8) -> Vec<Move> {
 			let index = target as usize;
 
 			if board[index] != 0  && board[index]&side == 0 {
-				//println!("Enemy in way");
 				moves.push(Move {
 					start: loc,
 					target: target as u8
 				});
 				break;
 			} else if board[index]&side != 0 {
-				//println!("Friend in way");
 				break;
 			} else {
-				//println!("Free spacee a head");
 				moves.push(Move {
 					start: loc,
 					target: target as u8
