@@ -21,15 +21,9 @@ pub struct State {
 }
 
 fn main() {
-	let starting = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+	let starting = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-	let mut state = State {
-		board: parse_fen(starting),
-		to_move: Pieces::WHITE,
-		moves_made: 0,
-		white_castle: 0b11,
-		black_castle: 0b11
-	};
+	let mut state = parse_fen(starting);
 
 
 	let mut input;

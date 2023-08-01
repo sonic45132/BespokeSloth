@@ -1,40 +1,40 @@
 use std::io;
-//use crate::State;
+use crate::State;
 use std::collections::HashMap;
 use crate::constants::Pieces;
 use crate::move_generation::Move;
 
-pub fn parse_fen(input: &str) -> [u8; 64] {
-  let hash = HashMap::from([('k',Pieces::KING), ('n', Pieces::KNIGHT), ('p', Pieces::PAWN), 
-                            ('b', Pieces::BISHOP), ('r', Pieces::ROOK), ('q', Pieces::QUEEN)]);
+//TODO: Implement parsing of castling state
+pub fn parse_fen(input: &str) -> State {
 
-  let mut board: [u8; 64] = [0;64];
-  let mut file: usize = 0;
-  let mut rank: usize = 7;
+  let mut state = State{
+    board: [0;64],
+    to_move: Pieces::WHITE,
+    moves_made: 0,
+    white_castle: 0b11,
+    black_castle: 0b11
+  };
+  
+  let parts: Vec<&str> = input.split(' ').collect();
 
-  for c in input.chars() {
-    if c == '/' {
-      file = 0;
-      rank -= 1;
-    } else {
-      if c.is_digit(10) {
-        file += c.to_digit(10).unwrap_or(0) as usize;
-      } else {
-        let lower = c.to_lowercase().last().unwrap_or('p');
-        if c.is_uppercase() {
-          let piece = hash[&lower];
-          let color = Pieces::WHITE;
-          board[rank*8+file] = (color|piece) as u8;
-        } else {
-          let piece = hash[&lower];
-          let color = Pieces::BLACK;
-          board[rank*8+file] = (color|piece) as u8;
-        }
-        file += 1;
-      }
-    }
+  if parts.len() != 6 {
+    panic!("Invalid FEN String!");
   }
-  return board;
+
+  state.board = parse_pieces(parts[0]);
+
+  if parts[1] == "b" {
+    state.to_move = Pieces::BLACK;
+  }
+
+  if parts[2] == "-" {
+    state.white_castle = 0;
+    state.black_castle = 0;
+  }
+
+  state.moves_made = parts[6].parse::<u32>().unwrap();
+  
+  return state;
 }
 
 pub fn print_board(board: [u8; 64]) {
@@ -139,6 +139,41 @@ pub fn from_alg(play: String) -> Move {
 
   Move {
     start: s_index as u8,
-    target: t_index as u8
+    target: t_index as u8,
+    castle: false
   }
+}
+
+fn parse_pieces(input: &str) -> [u8; 64] {
+
+  let hash = HashMap::from([('k',Pieces::KING), ('n', Pieces::KNIGHT), ('p', Pieces::PAWN), 
+                            ('b', Pieces::BISHOP), ('r', Pieces::ROOK), ('q', Pieces::QUEEN)]);
+
+  let mut board: [u8; 64] = [0;64];
+  let mut file: usize = 0;
+  let mut rank: usize = 7;
+
+  for c in input.chars() {
+    if c == '/' {
+      file = 0;
+      rank -= 1;
+    } else {
+      if c.is_digit(10) {
+        file += c.to_digit(10).unwrap_or(0) as usize;
+      } else {
+        let lower = c.to_lowercase().last().unwrap_or('p');
+        if c.is_uppercase() {
+          let piece = hash[&lower];
+          let color = Pieces::WHITE;
+          board[rank*8+file] = (color|piece) as u8;
+        } else {
+          let piece = hash[&lower];
+          let color = Pieces::BLACK;
+          board[rank*8+file] = (color|piece) as u8;
+        }
+        file += 1;
+      }
+    }
+  }
+  board
 }
