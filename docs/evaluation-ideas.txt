@@ -8,3 +8,10 @@ King Protection (Own side)
 Mobility
 - Favor squares where pieces have more moves?
   - ex. keep knights out of corners or off sides?
+
+Bitboards
+- Use to count pawns to lower value of certain pieces/see how far the game has progerssed
+  - Look into popcount sse4 function in rust
+  - bitintr crate
+
+
