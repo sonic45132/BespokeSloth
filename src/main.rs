@@ -4,14 +4,16 @@ mod evaluation;
 mod constants;
 mod move_generation;
 mod helpers;
+mod search;
 
 use constants::Pieces;
-use evaluation::score_board;
-use move_generation::Move;
-use rand::Rng;
+//use move_generation::*;
+//use rand::Rng;
+use search::*;
 
 use helpers::*;
 
+#[derive(Debug,Clone,Copy)]
 pub struct State {
 	pub board: [u8; 64],
 	pub to_move: u8,
@@ -23,35 +25,39 @@ pub struct State {
 fn main() {
 	let starting = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-	let mut state = parse_fen(starting);
+	let state = parse_fen(starting);
 
 
-	let mut input;
+	let best_move = minimax(&state, Pieces::WHITE, 5);
+	
+	println!("{:?}",best_move);
 
-	loop {
-		let mut rng = rand::thread_rng();
-		input = read_line();
-		let w_move = from_alg(input);
+	// let mut input;
 
-		//println!("{:?}", w_move);
+	// loop {
+	// 	let mut rng = rand::thread_rng();
+	// 	input = read_line();
+	// 	let w_move = from_alg(input);
 
-		let temp = state.board[w_move.start as usize];
-		state.board[w_move.start as usize] = Pieces::NONE;
-		state.board[w_move.target as usize] = temp;
+	// 	//println!("{:?}", w_move);
 
-		print_board(state.board);
+	// 	let temp = state.board[w_move.start as usize];
+	// 	state.board[w_move.start as usize] = Pieces::NONE;
+	// 	state.board[w_move.target as usize] = temp;
 
-		let moves = move_generation::generate_moves(&state, Pieces::BLACK);
+	// 	print_board(state.board);
 
-		let picked = &moves[rng.gen_range(0..moves.len())];
-	  println!("Picked move: {}", to_alg(picked));
-	  println!("{:?}",picked);
-	  let temp = state.board[picked.start as usize];
-	  state.board[picked.start as usize] = Pieces::NONE;
-	  state.board[picked.target as usize] = temp;
+	// 	let moves = move_generation::generate_moves(&state, Pieces::BLACK);
 
-	  print_board(state.board);
-	}
+	// 	let picked = &moves[rng.gen_range(0..moves.len())];
+	//   println!("Picked move: {}", to_alg(picked));
+	//   println!("{:?}",picked);
+	//   let temp = state.board[picked.start as usize];
+	//   state.board[picked.start as usize] = Pieces::NONE;
+	//   state.board[picked.target as usize] = temp;
+
+	//   print_board(state.board);
+	// }
 
 	// let mut rng = rand::thread_rng();
 

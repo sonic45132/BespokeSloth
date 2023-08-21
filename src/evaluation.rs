@@ -1,12 +1,11 @@
-use crate::constants::Values;
-use crate::constants::Pieces;
+use crate::State;
+use crate::constants::*;
 
-
-pub fn score_board(board: [u8;64], side: u8) -> i32 {
+pub fn score_board(state: &State, side: u8) -> i32 {
 
 	let mut totals: [i32; 2] = [0,0];
 
-	for square in board {
+	for square in state.board {
 		if square != 0 {
 			let tside = (square>>4) as usize;
 			match square&0b00111 {
