@@ -32,7 +32,7 @@ pub fn parse_fen(input: &str) -> State {
     state.black_castle = 0;
   }
 
-  state.moves_made = parts[6].parse::<u32>().unwrap();
+  state.moves_made = parts[5].parse::<u32>().unwrap();
   
   return state;
 }
@@ -176,4 +176,25 @@ fn parse_pieces(input: &str) -> [u8; 64] {
     }
   }
   board
+}
+
+pub fn make_move(state: &State, mv: Move, side: u8) -> State{
+
+  let mut nstate = *state;
+
+  if mv.castle == false {
+    let temp = nstate.board[mv.start as usize];
+    nstate.board[mv.start as usize] = Pieces::NONE;
+    nstate.board[mv.target as usize] = temp;
+
+    if side == Pieces::WHITE {
+      nstate.to_move = Pieces::BLACK;
+    } else {
+      nstate.to_move = Pieces::WHITE;
+      nstate.moves_made += 1;
+    }
+
+  }
+
+  nstate
 }
