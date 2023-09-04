@@ -11,8 +11,7 @@ pub fn parse_fen(input: &str) -> State {
     board: [0;64],
     to_move: Pieces::WHITE,
     moves_made: 0,
-    white_castle: 0b11,
-    black_castle: 0b11
+    castle: 0b1111
   };
   
   let parts: Vec<&str> = input.split(' ').collect();
@@ -28,8 +27,7 @@ pub fn parse_fen(input: &str) -> State {
   }
 
   if parts[2] == "-" {
-    state.white_castle = 0;
-    state.black_castle = 0;
+    state.castle = 0;
   }
 
   state.moves_made = parts[5].parse::<u32>().unwrap();
