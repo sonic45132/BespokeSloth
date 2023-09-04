@@ -131,7 +131,7 @@ fn king_moves(state: &State, side: u8, loc: u8) -> Vec<Move> {
 
 	//Castling - Verify
 	let mut filter = 0b0001;
-	if side == Pieces::BLACK { filter << 2; }
+	if side == Pieces::BLACK { filter = filter << 2; }
 
 	if state.castle != 0 {
 	  let index = loc as usize;
