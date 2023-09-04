@@ -1,6 +1,7 @@
 use std::cmp;
-use crate::State;
+use crate::constants::State;
 use crate::constants::Pieces;
+use crate::constants::Move;
 use crate::helpers::*;
 use crate::move_generation::*;
 use crate::evaluation::score_board;
@@ -10,7 +11,7 @@ pub fn minimax(state: &State, side: u8, depth: u32) -> Move {
   let mut best_move = Move {
     start: 0,
     target: 0,
-    castle: false
+    castle: 0
   };
 
   if side == Pieces::WHITE {

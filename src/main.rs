@@ -13,15 +13,6 @@ use search::*;
 
 use helpers::*;
 
-#[derive(Debug,Clone,Copy)]
-pub struct State {
-	pub board: [u8; 64],
-	pub to_move: u8,
-	pub moves_made: u32,
-	pub white_castle: u8,
-	pub black_castle: u8
-}
-
 fn main() {
 	let starting = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 

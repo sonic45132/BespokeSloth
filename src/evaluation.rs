@@ -1,4 +1,3 @@
-use crate::State;
 use crate::constants::*;
 
 pub fn score_board(state: &State, side: u8) -> i32 {

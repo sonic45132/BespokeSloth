@@ -23,3 +23,18 @@ impl Values {
   pub const ROOK: i32 = 50;
   pub const QUEEN: i32 = 90;
 }
+
+#[derive(Debug,Clone,Copy)]
+pub struct Move {
+  pub start: u8,
+  pub target: u8,
+  pub castle: u8
+}
+
+#[derive(Debug,Clone,Copy)]
+pub struct State {
+  pub board: [u8; 64],
+  pub to_move: u8,
+  pub moves_made: u32,
+  pub castle: u8,
+}

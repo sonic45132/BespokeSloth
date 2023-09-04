@@ -1,13 +1,6 @@
-use crate::State;
 use crate::constants::Pieces;
-
-#[derive(Debug,Clone,Copy)]
-pub struct Move {
-	pub start: u8,
-	pub target: u8,
-	pub castle: bool
-}
-
+use crate::constants::Move;
+use crate::constants::State;
 
 pub fn generate_moves(state: &State, side: u8) -> Vec<Move> {
 
@@ -62,7 +55,7 @@ fn pawn_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
 		moves.push(Move {
 			start: loc as u8,
 			target: (cur_pos+offset) as u8,
-			castle: false
+			castle: 0
 		});
 
 		//Generate starting pawn move of 2 spaces if on correct rank
@@ -72,7 +65,7 @@ fn pawn_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
 				moves.push(Move {
 					start: loc as u8,
 					target: (cur_pos+(offset*2)) as u8,
-					castle: false
+					castle: 0
 				});
 			}
 		} else {
@@ -80,7 +73,7 @@ fn pawn_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
 				moves.push(Move {
 					start: loc as u8,
 					target: (cur_pos+(offset*2)) as u8,
-					castle: false
+					castle: 0
 				});
 			}
 		}
@@ -93,7 +86,7 @@ fn pawn_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
 				moves.push(Move {
 					start: loc as u8,
 					target: (index-1) as u8,
-					castle: false
+					castle: 0
 				});
 			}
 		}
@@ -105,7 +98,7 @@ fn pawn_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
 				moves.push(Move {
 					start: loc as u8,
 					target: (index+1) as u8,
-					castle: false
+					castle: 0
 				});
 			}
 		}
@@ -130,51 +123,35 @@ fn king_moves(state: &State, side: u8, loc: u8) -> Vec<Move> {
 			moves.push(Move {
 				start: loc,
 				target: index as u8,
-				castle: false
+				castle: 0
 			});
 		}
 
 	}
 
-	//Castling - Help me
-	if side == Pieces::WHITE && state.white_castle != 0 {
-		let index = loc as usize;
-		if state.white_castle & 0b01 != 0 {
-			if state.board[index+1] == 0 && state.board[index+2] == 0 {
-				moves.push(Move {
-					start: loc,
-					target: loc+2,
-					castle: true
-				});
-			}
-		} else if state.white_castle & 0b01 != 0 {
-			if state.board[index-1]&state.board[index-2]&state.board[index-3] == 0 {
-				moves.push(Move {
-					start: loc,
-					target: loc-2,
-					castle: true
-				});
-			}
-		}
-	} else if side == Pieces::BLACK && state.black_castle != 0 {
-		let index = loc as usize;
-		if state.black_castle & 0b01 != 0 {
-			if state.board[index+1] == 0 && state.board[index+2] == 0 {
-				moves.push(Move {
-					start: loc,
-					target: loc+2,
-					castle: true
-				});
-			}
-		} else if state.black_castle & 0b01 != 0 {
-			if state.board[index-1]&state.board[index-2]&state.board[index-3] == 0 {
-				moves.push(Move {
-					start: loc,
-					target: loc-2,
-					castle: true
-				});
-			}
-		}
+	//Castling - Verify
+	let mut filter = 0b0001;
+	if side == Pieces::BLACK { filter << 2; }
+
+	if state.castle != 0 {
+	  let index = loc as usize;
+	  if state.castle & filter != 0 {
+      if state.board[index+1] | state.board[index+2] == 0 {
+        moves.push(Move {
+          start: loc,
+          target: loc+2,
+          castle: 1
+        });
+      }
+    } else if state.castle & (filter << 1) != 0 {
+      if (state.board[index-1] | state.board[index-2] | state.board[index-3]) == 0 {
+        moves.push(Move {
+          start: loc,
+          target: loc-2,
+          castle: 2
+        });
+      }
+    }
 	}
 
 	moves
@@ -203,7 +180,7 @@ fn knight_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
 			moves.push(Move {
 				start: loc,
 				target: index as u8,
-				castle: false
+				castle: 0
 			});
 		}
 
@@ -245,7 +222,7 @@ fn slide_moves(board: [u8;64], side: u8, loc: u8, piece: u8) -> Vec<Move> {
 				moves.push(Move {
 					start: loc,
 					target: target as u8,
-					castle: false
+					castle: 0
 				});
 				break;
 			} else if board[index]&side != 0 {
@@ -254,7 +231,7 @@ fn slide_moves(board: [u8;64], side: u8, loc: u8, piece: u8) -> Vec<Move> {
 				moves.push(Move {
 					start: loc,
 					target: target as u8,
-					castle: false
+					castle: 0
 				});
 			}
 

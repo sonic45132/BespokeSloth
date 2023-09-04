@@ -1,8 +1,8 @@
 use std::io;
-use crate::State;
+use crate::constants::State;
 use std::collections::HashMap;
 use crate::constants::Pieces;
-use crate::move_generation::Move;
+use crate::constants::Move;
 
 //TODO: Implement parsing of castling state
 pub fn parse_fen(input: &str) -> State {
@@ -140,7 +140,7 @@ pub fn from_alg(play: String) -> Move {
   Move {
     start: s_index as u8,
     target: t_index as u8,
-    castle: false
+    castle: 0
   }
 }
 
@@ -178,11 +178,12 @@ fn parse_pieces(input: &str) -> [u8; 64] {
   board
 }
 
+//TODO more castling
 pub fn make_move(state: &State, mv: Move, side: u8) -> State{
 
   let mut nstate = *state;
 
-  if mv.castle == false {
+  if mv.castle == 0 {
     let temp = nstate.board[mv.start as usize];
     nstate.board[mv.start as usize] = Pieces::NONE;
     nstate.board[mv.target as usize] = temp;
