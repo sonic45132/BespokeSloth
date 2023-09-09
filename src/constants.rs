@@ -38,3 +38,10 @@ pub struct State {
   pub moves_made: u32,
   pub castle: u8,
 }
+
+pub struct TEntry {
+  pub hash: u64,
+  pub best_move: Move,
+  pub score: i32,
+  pub pad1: u8,
+}

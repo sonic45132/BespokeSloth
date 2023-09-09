@@ -26,7 +26,7 @@ pub fn generate_moves(state: &State, side: u8) -> Vec<Move> {
 	moves
 }
 
-//TODO: Look into cleaning this up
+//TODO: Look into cleaning this up and en passant
 fn pawn_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
 
 	let cur_pos = loc as i32;
