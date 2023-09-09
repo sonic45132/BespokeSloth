@@ -9,6 +9,7 @@ mod zorbist;
 
 
 use constants::Pieces;
+use constants::TEntry;
 //use move_generation::*;
 //use rand::Rng;
 use search::*;
@@ -24,5 +25,7 @@ fn main() {
 	let best_move = minimax(&state, Pieces::WHITE, 5);
 	
 	println!("{:?}",best_move);
+
+	let mut t_table: [TEntry; 2^24];
 
 }

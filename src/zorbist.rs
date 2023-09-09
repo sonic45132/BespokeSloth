@@ -20,6 +20,7 @@ pub fn generate_hash(state: State, keys: [u64; 781]) -> u64 {
 
   let mut hash = 0;
 
+  //Pices on Board
   for i in 0..64 {
     let square = state.board[i as usize];
     if square != 0 {
@@ -29,14 +30,17 @@ pub fn generate_hash(state: State, keys: [u64; 781]) -> u64 {
     }
   }
 
+  //Black to Move
   if state.to_move == Pieces::BLACK { hash = hash ^ keys[768]; }
 
-
+  //Castling
   for n in 0..4 {
     if state.castle&(0b1<<n) != 0 {
       hash = hash^keys[769+n];
     }
   }
+
+  //TODO: En Passant
 
   return hash;
 }
