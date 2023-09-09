@@ -183,6 +183,31 @@ pub fn make_move(state: &State, mv: Move, side: u8) -> State{
 
   if mv.castle == 0 {
     let temp = nstate.board[mv.start as usize];
+
+    //Set castling ability
+    let mut filter = 0b0011;
+    if side == Pieces::BLACK { filter = filter << 2; }
+
+    if nstate.castle&filter != 0 {
+      if temp&Pieces::KING != 0 {
+        if side == Pieces::WHITE {
+          nstate.castle = nstate.castle&0b1100;
+        } else {
+          nstate.castle = nstate.castle&0b0011;
+        }
+      }
+
+      if temp&Pieces::ROOK != 0 {
+        if side == Pieces::WHITE {
+          if mv.start == 0 { nstate.castle = nstate.castle&0b1101; }
+          if mv.start == 7 { nstate.castle = nstate.castle&0b1110; }
+        } else {
+          if mv.start == 56 { nstate.castle = nstate.castle&0b0111; }
+          if mv.start == 64 { nstate.castle = nstate.castle&0b1011; }
+        }
+      }
+    }
+
     nstate.board[mv.start as usize] = Pieces::NONE;
     nstate.board[mv.target as usize] = temp;
 

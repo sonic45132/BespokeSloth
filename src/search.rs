@@ -90,7 +90,7 @@ pub fn negamax(state: &State, side: u8, depth: u32) -> Move {
     n_side = Pieces::WHITE;
   }
 
-  let mut alpha = i32::MIN;
+  let mut alpha = -2147483647;
   let beta = i32::MAX;
 
   let moves = generate_moves(state, side);
