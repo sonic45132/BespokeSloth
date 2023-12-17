@@ -11,7 +11,9 @@ pub fn parse_fen(input: &str) -> State {
     board: [0;64],
     to_move: Pieces::WHITE,
     moves_made: 0,
-    castle: 0b1111
+    castle: 0b1111,
+    piece_bbs: [0;6],
+    side_bbs: [0;2]
   };
   
   let parts: Vec<&str> = input.split(' ').collect();
@@ -21,6 +23,10 @@ pub fn parse_fen(input: &str) -> State {
   }
 
   state.board = parse_pieces(parts[0]);
+  let arrs = buildbbs(&state.board);
+
+  state.piece_bbs = arrs.0;
+  state.side_bbs = arrs.1;
 
   if parts[1] == "b" {
     state.to_move = Pieces::BLACK;
@@ -221,4 +227,69 @@ pub fn make_move(state: &State, mv: Move, side: u8) -> State{
   }
 
   nstate
+}
+
+pub fn isInCheck(board: &[u8;64], side: u8, loc: u8) -> (bool,u8) {
+
+  for i in 1..8 {
+    
+  }
+
+  (false,0)
+}
+
+fn buildbbs(board: &[u8;64]) -> ([u64; 6], [u64; 2]) {
+  let mut piece_bbs:[u64;6] = [0;6];
+  let mut side_bbs:[u64;2] = [0; 2];
+
+  for i in 0..64 {
+    let cur_bit:u64 = 1 << (i as u64);
+    let side:usize = ((board[i] & Pieces::BLACK) >> 4) as usize;
+    match board[i]&0b00111 {
+      Pieces::PAWN => {
+        let bbi:usize = (Pieces::PAWN - 1) as usize;
+        piece_bbs[bbi] = piece_bbs[bbi] | cur_bit;
+        side_bbs[side] = side_bbs[side] | cur_bit;
+      }
+      Pieces::KING => {
+        let bbi:usize = (Pieces::KING - 1) as usize;
+        piece_bbs[bbi] = piece_bbs[bbi] | cur_bit;
+        side_bbs[side] = side_bbs[side] | cur_bit;
+      }
+      Pieces::KNIGHT => {
+        let bbi:usize = (Pieces::KNIGHT - 1) as usize;
+        piece_bbs[bbi] = piece_bbs[bbi] | cur_bit;
+        side_bbs[side] = side_bbs[side] | cur_bit;
+      }
+      Pieces::ROOK => {
+        let bbi:usize = (Pieces::ROOK - 1) as usize;
+        piece_bbs[bbi] = piece_bbs[bbi] | cur_bit;
+        side_bbs[side] = side_bbs[side] | cur_bit;
+      }
+      Pieces::BISHOP => {
+        let bbi:usize = (Pieces::BISHOP - 1) as usize;
+        piece_bbs[bbi] = piece_bbs[bbi] | cur_bit;
+        side_bbs[side] = side_bbs[side] | cur_bit;      }
+      Pieces::QUEEN => {
+        let bbi:usize = (Pieces::QUEEN - 1) as usize;
+        piece_bbs[bbi] = piece_bbs[bbi] | cur_bit;
+        side_bbs[side] = side_bbs[side] | cur_bit;
+      }
+      _ => ()
+    }
+  }
+
+  return(piece_bbs, side_bbs);
+}
+
+fn setupbbs(state: &mut State) {
+  state.piece_bbs[0] = 0x1000000000000010;
+  state.piece_bbs[1] = 0x00FF00000000FF00;
+  state.piece_bbs[2] = 0x4200000000000042;
+  state.piece_bbs[3] = 0x2400000000000024;
+  state.piece_bbs[4] = 0x8100000000000081;
+  state.piece_bbs[5] = 0x0800000000000008;
+
+  state.side_bbs[0] = 0x000000000000FFFF;
+  state.side_bbs[1] = 0xFFFF000000000000;
 }

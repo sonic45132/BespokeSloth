@@ -19,9 +19,9 @@ pub struct Values;
 impl Values {
   pub const PAWN: i32 = 10;
   pub const KNIGHT: i32 = 30;
-  pub const BISHOP: i32 = 30;
-  pub const ROOK: i32 = 50;
-  pub const QUEEN: i32 = 90;
+  pub const BISHOP: i32 = 31;
+  pub const ROOK: i32 = 51;
+  pub const QUEEN: i32 = 91;
 }
 
 #[derive(Debug,Clone,Copy)]
@@ -37,6 +37,8 @@ pub struct State {
   pub to_move: u8,
   pub moves_made: u32,
   pub castle: u8,
+  pub piece_bbs: [u64; 6],
+  pub side_bbs: [u64; 2]
 }
 
 pub struct TEntry {

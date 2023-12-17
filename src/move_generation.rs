@@ -1,25 +1,34 @@
-use crate::constants::Pieces;
-use crate::constants::Move;
-use crate::constants::State;
+use crate::helpers::*;
+use crate::constants::*;
 
 pub fn generate_moves(state: &State, side: u8) -> Vec<Move> {
 
 	let mut moves: Vec<Move> = Vec::new();
-	let board = state.board;
+	let mut inCheck = (false,0);
 
 	for i in 0..64 {
-		let square = board[i];
+		let square = state.board[i];
 		if square&side == 0 { continue; }
 
+		//Generate all possible piece moves.
 		match square&0b00111 {
-			Pieces::PAWN => moves.extend(pawn_moves(board, side, i as u8)),
-			Pieces::KING => moves.extend(king_moves(state, side, i as u8)),
-			Pieces::KNIGHT => moves.extend(knight_moves(board, side, i as u8)),
-			Pieces::ROOK => moves.extend(slide_moves(board, side, i as u8, Pieces::ROOK)),
-			Pieces::BISHOP => moves.extend(slide_moves(board, side, i as u8, Pieces::BISHOP)),
-			Pieces::QUEEN => moves.extend(slide_moves(board, side, i as u8, Pieces::QUEEN)),
+			Pieces::PAWN => moves.extend(pawn_moves(&state.board, side, i as u8)),
+			Pieces::KING => {
+				moves.extend(king_moves(state, side, i as u8));
+				inCheck = isInCheck(&state.board, side, i as u8);
+			}
+			Pieces::KNIGHT => moves.extend(knight_moves(&state.board, side, i as u8)),
+			Pieces::ROOK => moves.extend(slide_moves(&state.board, side, i as u8, Pieces::ROOK)),
+			Pieces::BISHOP => moves.extend(slide_moves(&state.board, side, i as u8, Pieces::BISHOP)),
+			Pieces::QUEEN => moves.extend(slide_moves(&state.board, side, i as u8, Pieces::QUEEN)),
 			_ => ()
 		}
+
+	}
+
+	//Eliminate moves that are illegal
+	//e.g., moves that dont remove check or castling through check
+	for m in &moves {
 
 	}
 
@@ -27,7 +36,8 @@ pub fn generate_moves(state: &State, side: u8) -> Vec<Move> {
 }
 
 //TODO: Look into cleaning this up and en passant
-fn pawn_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
+//TODO: Add in promotion here or in during the make move
+fn pawn_moves(board: &[u8;64], side: u8, loc: u8) -> Vec<Move> {
 
 	let cur_pos = loc as i32;
 
@@ -157,7 +167,7 @@ fn king_moves(state: &State, side: u8, loc: u8) -> Vec<Move> {
 	moves
 }
 
-fn knight_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
+fn knight_moves(board: &[u8;64], side: u8, loc: u8) -> Vec<Move> {
 
 	let mut moves: Vec<Move> = Vec::new();
 
@@ -191,7 +201,7 @@ fn knight_moves(board: [u8;64], side: u8, loc: u8) -> Vec<Move> {
 	moves
 }
 
-fn slide_moves(board: [u8;64], side: u8, loc: u8, piece: u8) -> Vec<Move> {
+fn slide_moves(board: &[u8;64], side: u8, loc: u8, piece: u8) -> Vec<Move> {
 
 	let mut moves: Vec<Move> = Vec::new();
 	let cur_pos = loc as i32;
