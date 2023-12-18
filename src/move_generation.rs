@@ -28,15 +28,15 @@ pub fn generate_moves(state: &State, side: u8) -> Vec<Move> {
 
 	//Eliminate moves that are illegal
 	//e.g., moves that dont remove check or castling through check
-	for m in &moves {
+	// for m in &moves {
 
-	}
+	// }
 
 	moves
 }
 
 //TODO: Look into cleaning this up and en passant
-//TODO: Add in promotion here or in during the make move
+//TODO: Add in promotion here or during the make move
 fn pawn_moves(board: &[u8;64], side: u8, loc: u8) -> Vec<Move> {
 
 	let cur_pos = loc as i32;
@@ -79,38 +79,35 @@ fn pawn_moves(board: &[u8;64], side: u8, loc: u8) -> Vec<Move> {
 				});
 			}
 		} else {
-			if loc/8 == 7 && board[index2] == 0 {
+			if loc/8 == 6 && board[index2] == 0 {
 				moves.push(Move {
 					start: loc as u8,
 					target: (cur_pos+(offset*2)) as u8,
 					castle: 0
 				});
+			} else {
 			}
 		}
 	}
 
 	//Check for capture moves one left and one right of the square ahead
-	if index!= 0 && index/8 == (index-1)/8 {
-		if board[index-1] != 0 {
-			if board[index-1]&side == 0 {
-				moves.push(Move {
-					start: loc as u8,
-					target: (index-1) as u8,
-					castle: 0
-				});
-			}
+	if index != 0 && index/8 == (index-1)/8 {
+		if board[index-1] != 0 && board[index-1]&side == 0 {
+			moves.push(Move {
+				start: loc as u8,
+				target: (index-1) as u8,
+				castle: 0
+			});
 		}
 	}
 
 	if index/8 == (index+1)/8 && (index+1) < 64{
-		if board[index+1] != 0 {
-			if board[index+1]&side == 0 {
-				moves.push(Move {
-					start: loc as u8,
-					target: (index+1) as u8,
-					castle: 0
-				});
-			}
+		if board[index+1] != 0  && board[index+1]&side == 0{
+			moves.push(Move {
+				start: loc as u8,
+				target: (index+1) as u8,
+				castle: 0
+			});
 		}
 	}
 
@@ -221,9 +218,9 @@ fn slide_moves(board: &[u8;64], side: u8, loc: u8, piece: u8) -> Vec<Move> {
 			let target = cur_pos + (dir*i);
 			if target > 63 || target < 0 { break; }
 			let t_rank = target/8;
-			let c_rank = (cur_pos + (dir*(i-1)))/8;
+			let c_rank = cur_pos/8;
 			let r_diff = (t_rank-c_rank).abs();
-			if (dir < -6 || dir > 6) && r_diff != 1 { break; }
+			if (dir < -6 || dir > 6) && r_diff != i { break; }
 			if (dir > -6 && dir < 6) && r_diff != 0 { break; }
 
 			let index = target as usize;
@@ -250,8 +247,6 @@ fn slide_moves(board: &[u8;64], side: u8, loc: u8, piece: u8) -> Vec<Move> {
 		}
 
 	}
-
-	//println!("{:?}",moves);
 
 	moves
 }

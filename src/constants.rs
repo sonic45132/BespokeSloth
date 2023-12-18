@@ -22,6 +22,7 @@ impl Values {
   pub const BISHOP: i32 = 31;
   pub const ROOK: i32 = 51;
   pub const QUEEN: i32 = 91;
+  pub const KING: i32 = 10000;
 }
 
 #[derive(Debug,Clone,Copy)]

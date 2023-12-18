@@ -1,4 +1,5 @@
 use std::cmp;
+use rand::Rng;
 use crate::constants::State;
 use crate::constants::Pieces;
 use crate::constants::Move;
@@ -8,11 +9,7 @@ use crate::evaluation::score_board;
 
 pub fn negamax(state: &State, side: u8, depth: u32) -> Move {
 
-  let mut best_move = Move {
-    start: 0,
-    target: 0,
-    castle: 0
-  };
+  let mut best_moves: Vec<Move> = Vec::new();
 
   let n_side;
   if side == Pieces::WHITE {
@@ -21,24 +18,33 @@ pub fn negamax(state: &State, side: u8, depth: u32) -> Move {
     n_side = Pieces::WHITE;
   }
 
-  let mut alpha = -2147483647;
-  let beta = i32::MAX;
+  let mut alpha = -2000000000;
+  let beta = 2000000000;
 
   let moves = generate_moves(state, side);
+  //println!("{:?}",moves); 
   for mv in moves {
     let tstate = make_move(state, mv, side);
     let score = -negamax_v(&tstate, n_side, depth-1, -beta, -alpha);
     //println!("Move: {} scored: {}",to_alg(&mv), score);
     if score >= beta {
-      best_move = mv;
-      return best_move;
+      return mv;
     }
     if score > alpha {
       alpha = score;
-      best_move = mv;
+      best_moves.clear();
+      best_moves.push(mv);
+    } else if score == alpha {
+      best_moves.push(mv);
     }
   }
-  return best_move;
+
+  if best_moves.len() != 1 {
+    let mut rng = rand::thread_rng();
+    return best_moves[rng.gen_range(0..best_moves.len())];
+  } else {
+    return best_moves[0];
+  }
 }
 
 fn negamax_v(state: &State, side: u8, depth: u32, alpha: i32, beta: i32) -> i32 {

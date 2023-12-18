@@ -33,7 +33,7 @@ fn main() {
 	}
 
 	if side == Pieces::WHITE {
-		let best_move = negamax(&state, side, 7);
+		let best_move = negamax(&state, side, 8);
 		println!("{:?}",to_alg(&best_move));
 		state = make_move(&state, best_move, state.to_move);
 	}
@@ -42,7 +42,7 @@ fn main() {
 		let other_move = from_alg(read_line());
 		state = make_move(&state, other_move, state.to_move);
 
-		let best_move = negamax(&state, side, 7);
+		let best_move = negamax(&state, side, 8);
 		println!("{:?}",to_alg(&best_move));
 		state = make_move(&state, best_move, state.to_move);
 	}

@@ -30,6 +30,9 @@ pub fn score_board(state: &State, side: u8) -> i32 {
 	let mut white_total:i32 = 0;
 	let mut black_total:i32 = 0;
 
+	white_total += (state.piece_bbs[0]&state.side_bbs[0]).count_ones() as i32 * Values::KING;
+	black_total += (state.piece_bbs[0]&state.side_bbs[1]).count_ones() as i32 * Values::KING;
+
 	white_total += (state.piece_bbs[1]&state.side_bbs[0]).count_ones() as i32 * Values::PAWN;
 	black_total += (state.piece_bbs[1]&state.side_bbs[1]).count_ones() as i32 * Values::PAWN;
 
@@ -45,7 +48,12 @@ pub fn score_board(state: &State, side: u8) -> i32 {
 	white_total += (state.piece_bbs[5]&state.side_bbs[0]).count_ones() as i32 * Values::QUEEN;
 	black_total += (state.piece_bbs[5]&state.side_bbs[1]).count_ones() as i32 * Values::QUEEN;
 
+	//println!("White: {0}",white_total);
+	//println!("Black: {0}",black_total);
+
 	if(side >> 4 == 0) {
+		println!("White: {:?}", white_total);
+		println!("Black: {:?}", black_total);
 		return white_total - black_total;
 	} else {
 		return black_total - white_total;
