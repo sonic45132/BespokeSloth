@@ -39,7 +39,8 @@ pub struct State {
   pub moves_made: u32,
   pub castle: u8,
   pub piece_bbs: [u64; 6],
-  pub side_bbs: [u64; 2]
+  pub side_bbs: [u64; 2],
+  pub zkeys: [u64; 781]
 }
 
 pub struct TEntry {

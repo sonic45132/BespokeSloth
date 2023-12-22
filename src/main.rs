@@ -13,10 +13,13 @@ use constants::Pieces;
 //use move_generation::*;
 //use rand::Rng;
 use search::*;
+use zorbist::*;
 
 use helpers::*;
 
 fn main() {
+
+	let zkeys = generate_keys(0xDEADBEEF);
 
 	if read_line() != "start" {
 		std::process::exit(1);

@@ -13,7 +13,8 @@ pub fn parse_fen(input: &str) -> State {
     moves_made: 0,
     castle: 0b1111,
     piece_bbs: [0;6],
-    side_bbs: [0;2]
+    side_bbs: [0;2],
+    zkeys: [0;781]
   };
   
   let parts: Vec<&str> = input.split(' ').collect();
