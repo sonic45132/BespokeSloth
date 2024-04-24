@@ -216,13 +216,13 @@ pub fn make_move(state: &State, mv: Move, side: u8) -> State{
     }
 
     //Update bitboards
-    nstate.piece_bbs[((temp&0b111) - 1) as usize] ^= (1 << mv.start);
-    nstate.piece_bbs[((temp&0b111) - 1) as usize] |= (1 << mv.target);
+    nstate.piece_bbs[((temp&0b111) - 1) as usize] ^= 1 << mv.start;
+    nstate.piece_bbs[((temp&0b111) - 1) as usize] |= 1 << mv.target;
 
-    if(nstate.board[mv.target as usize] != 0) {
+    if nstate.board[mv.target as usize] != 0 {
       let e_type = nstate.board[mv.target as usize] & 0b111;
-      nstate.piece_bbs[(e_type - 1) as usize] ^= (1 << mv.target);
-      nstate.side_bbs[1-(side >> 4) as usize] ^= (1 << mv.target);
+      nstate.piece_bbs[(e_type - 1) as usize] ^= 1 << mv.target;
+      nstate.side_bbs[1-(side >> 4) as usize] ^= 1 << mv.target;
     }
 
     //Update Board
@@ -230,12 +230,12 @@ pub fn make_move(state: &State, mv: Move, side: u8) -> State{
     nstate.board[mv.target as usize] = temp;
 
     if side == Pieces::WHITE {
-      nstate.side_bbs[0] ^= (1 << mv.start);
-      nstate.side_bbs[0] |= (1 << mv.target);
+      nstate.side_bbs[0] ^= 1 << mv.start;
+      nstate.side_bbs[0] |= 1 << mv.target;
       nstate.to_move = Pieces::BLACK;
     } else {
-      nstate.side_bbs[1] ^= (1 << mv.start);
-      nstate.side_bbs[1] |= (1 << mv.target);
+      nstate.side_bbs[1] ^= 1 << mv.start;
+      nstate.side_bbs[1] |= 1 << mv.target;
       nstate.to_move = Pieces::WHITE;
       nstate.moves_made += 1;
     }
@@ -245,11 +245,11 @@ pub fn make_move(state: &State, mv: Move, side: u8) -> State{
   nstate
 }
 
-pub fn isInCheck(board: &[u8;64], side: u8, loc: u8) -> (bool,u8) {
+pub fn is_in_check(_board: &[u8;64], _side: u8, _loc: u8) -> (bool,u8) {
 
-  for i in 1..8 {
+  // for i in 1..8 {
     
-  }
+  // }
 
   (false,0)
 }

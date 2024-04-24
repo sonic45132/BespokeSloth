@@ -37,7 +37,7 @@ pub fn generate_hash(state: State) -> u64 {
   //Castling
   for n in 0..4 {
     if state.castle&(0b1<<n) != 0 {
-      hash ^= keys[769+n];
+      //hash ^= keys[769+n];
     }
   }
 

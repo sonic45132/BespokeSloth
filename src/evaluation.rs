@@ -51,7 +51,7 @@ pub fn score_board(state: &State, side: u8) -> i32 {
 	//println!("White: {0}",white_total);
 	//println!("Black: {0}",black_total);
 
-	if(side >> 4 == 0) {
+	if side >> 4 == 0 {
 		println!("White: {:?}", white_total);
 		println!("Black: {:?}", black_total);
 		return white_total - black_total;

@@ -1,10 +1,10 @@
-use crate::helpers::*;
+//use crate::helpers::*;
 use crate::constants::*;
 
 pub fn generate_moves(state: &State, side: u8) -> Vec<Move> {
 
 	let mut moves: Vec<Move> = Vec::new();
-	let mut inCheck = (false,0);
+	//let mut in_check = (false,0);
 
 	for i in 0..64 {
 		let square = state.board[i];
@@ -15,7 +15,7 @@ pub fn generate_moves(state: &State, side: u8) -> Vec<Move> {
 			Pieces::PAWN => moves.extend(pawn_moves(&state.board, side, i as u8)),
 			Pieces::KING => {
 				moves.extend(king_moves(state, side, i as u8));
-				inCheck = isInCheck(&state.board, side, i as u8);
+				//in_check = is_in_check(&state.board, side, i as u8);
 			}
 			Pieces::KNIGHT => moves.extend(knight_moves(&state.board, side, i as u8)),
 			Pieces::ROOK => moves.extend(slide_moves(&state.board, side, i as u8, Pieces::ROOK)),
