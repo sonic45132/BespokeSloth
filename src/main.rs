@@ -20,7 +20,7 @@ use uci::*;
 
 fn main() {
 
-	setup_uci();
+	run_uci();
 	std::process::exit(1);
 
 	// let zkeys = generate_keys(0xDEADBEEF);
