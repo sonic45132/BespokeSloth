@@ -3,6 +3,7 @@ use crate::constants::State;
 use std::collections::HashMap;
 use crate::constants::Pieces;
 use crate::constants::Move;
+use crate::uci::OptionValue;
 
 //TODO: Implement parsing of castling state
 pub fn parse_fen(input: &str) -> State {
@@ -308,4 +309,18 @@ fn setupbbs(state: &mut State) {
 
   state.side_bbs[0] = 0x000000000000FFFF;
   state.side_bbs[1] = 0xFFFF000000000000;
+}
+
+pub fn find_option(options:&Vec<OptionValue>) -> Option<&OptionValue> {
+  options.iter().find( |&opt|
+    match opt {
+      OptionValue::Spin{ name, ..} => {
+        if name == "Hash" {
+         true 
+        } else {
+          false
+        }},
+      _ => false
+    }
+  )
 }

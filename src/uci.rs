@@ -1,47 +1,134 @@
 use crate::helpers::*;
 use std::sync::mpsc;
 use std::thread;
+use std::io::{self, BufRead};
+use vampirc_uci::parse_one;
+use vampirc_uci::{UciMessage,UciOptionConfig};
+
+pub enum OptionValue {
+	Check {
+        name: String,
+        value: bool,
+    },
+    Spin {
+        name: String,
+        value: i64
+    },
+    Combo {
+        name: String,
+        value: String
+    },
+    String {
+        name: String,
+        value: String
+    }
+}
+
 
 
 //Sets up channels for passing data between control and compute threads.
-pub fn run_uci() {
-	let (commandtx, commandrx) = mpsc::channel::<String>();
-	let (resulttx, resultrx) = mpsc::channel::<String>();
+pub fn setup_uci() {
+	let (uci_tx, uci_rx) = mpsc::channel::<UciMessage>();
 
 	thread::spawn(move || {
-		uci_control(commandtx, resultrx);
+		for line in io::stdin().lock().lines() {
+			let msg: UciMessage = parse_one(&line.unwrap());
+			println!("Received message: {}", msg);
+			uci_tx.send(msg).unwrap();
+		}
 	});
 
-	compute_control(commandrx, resulttx);
+	uci_control(uci_rx);
 }
 
-//Compute thread main function. Handles uci logic and controls main compute thread.
-fn uci_control(commandtx: mpsc::Sender<String>, resultrx: mpsc::Receiver<String>) {
+fn uci_control(uci_rx: mpsc::Receiver<UciMessage>) {
+	//Wait for beginning uci message
+	wait_for_uci(&uci_rx);
+	send_uci_id();
 
-	//Setup and spawn the thread to handle blocking stdin reading
-	let (stdin_tx, stdin_rx) = mpsc::channel::<String>();
-	thread::spawn(move || {
-		loop {
-			let line = read_line();
-			stdin_tx.send(line);
+	let options = vec![
+		UciOptionConfig::Spin {
+			name: "Hash".to_string(),
+			default: Some(1024),
+			min: Some(512),
+			max: Some(16384)
+		},
+		UciOptionConfig::Check {
+			name: "Ponder".to_string(),
+			default: Some(false),
 		}
-	});
+	];
 
+	let _option_values = convert_to_values(&options);
+	send_options(&options);
+
+	println!("{}",UciMessage::UciOk);
+
+
+}
+
+fn wait_for_uci(uci_rx:&mpsc::Receiver<UciMessage>) {
 	loop {
-		let stdin_rx_result = stdin_rx.try_recv();
-		let compute_info_result = resultrx.try_recv();
+		let message = get_message_blocking(&uci_rx).unwrap();
 
-		let stdin_line = match stdin_rx_result {
-			Ok(line) => line,
-			Err(e) => String::from("")
+		match message {
+			UciMessage::Uci => break,
+			_ => continue
 		};
-
-		if stdin_line != "" {
-			commandtx.send(stdin_line).unwrap();
-		}
 	}
 }
 
-fn compute_control(_commandrx: mpsc::Sender<String>, _resulttx: mpsc::Receiver<String>) {
+fn send_uci_id() {
+	let name = UciMessage::id_name("Bespoke Sloth");
+	let author = UciMessage::id_author("Neonstatic");
 
+	println!("{}", name);
+	println!("{}", author);
+}
+
+fn send_options(opts: &Vec<UciOptionConfig>) {
+	for option in opts.iter() {
+		let tmp = option.clone();
+		println!("{}", UciMessage::Option(tmp));
+	}
+}
+
+fn convert_to_values(opts: &Vec<UciOptionConfig>) -> Vec<OptionValue> {
+	let mut vals = Vec::new();
+	for option in opts.iter() {
+		match option {
+			UciOptionConfig::Check { name, default} => {
+				vals.push(
+					OptionValue::Check {
+						name: name.to_string(),
+						value: default.unwrap_or(false)
+					}
+				);
+			},
+			UciOptionConfig::Spin { name, default, ..} => {
+				vals.push(
+					OptionValue::Spin {
+						name: name.to_string(),
+						value: default.unwrap_or(0)
+					}
+				);
+			},
+			_ => todo!(),
+		}
+	}
+	vals
+}
+
+fn get_message_blocking(uci_rx:&mpsc::Receiver<UciMessage>) -> Option<UciMessage> {
+	match uci_rx.recv() {
+		Ok(msg) => Some(msg),
+		Err(_e) => None
+	}
+}
+
+fn get_message(uci_rx:mpsc::Receiver<UciMessage>) -> Option<UciMessage> {
+	match uci_rx.try_recv() {
+		Ok(msg) => Some(msg),
+		Err(_e) => None
+	}
 }

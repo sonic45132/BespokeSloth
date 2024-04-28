@@ -7,12 +7,14 @@ mod helpers;
 mod search;
 mod zorbist;
 mod uci;
+mod engine;
 
 
 //use constants::Pieces;
 //use constants::TEntry;
 //use rand::Rng;
 use uci::*;
+extern crate vampirc_uci;
 //use search::*;
 //use zorbist::*;
 
@@ -20,7 +22,7 @@ use uci::*;
 
 fn main() {
 
-	run_uci();
+	setup_uci();
 	std::process::exit(1);
 
 	// let zkeys = generate_keys(0xDEADBEEF);
