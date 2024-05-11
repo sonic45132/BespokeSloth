@@ -43,6 +43,8 @@ pub struct State {
   pub zkeys: [u64; 781]
 }
 
+pub const SIZE_TENTRY: usize = std::mem::size_of::<TEntry>();
+
 pub struct TEntry {
   pub hash: u64,
   pub best_move: Move,

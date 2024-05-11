@@ -1,5 +1,5 @@
+use std::collections::HashMap;
 use crate::engine::Engine;
-use crate::helpers::*;
 use std::sync::mpsc;
 use std::thread;
 use std::io::{self, BufRead};
@@ -8,25 +8,11 @@ use vampirc_uci::{UciMessage,UciOptionConfig};
 
 #[derive(Debug)]
 pub enum OptionValue {
-	Check {
-        name: String,
-        val: bool,
-    },
-    Spin {
-        name: String,
-        val: i64
-    },
-    Combo {
-        name: String,
-        val: String
-    },
-    String {
-        name: String,
-        val: String
-    }
+	Check(bool),
+    Spin(i64),
+    Combo(String),
+    String(String)
 }
-
-
 
 //Sets up channels for passing data between control and compute threads.
 pub fn setup_uci() {
@@ -51,32 +37,11 @@ fn uci_control(uci_rx: mpsc::Receiver<UciMessage>) {
 	//Send engine id info
 	send_uci_id();
 
-	//Build engine option list
-	let options = vec![
-		UciOptionConfig::Spin {
-			name: String::from("Hash"),
-			default: Some(1024),
-			min: Some(512),
-			max: Some(16384)
-		},
-		UciOptionConfig::Check {
-			name: String::from("Ponder"),
-			default: Some(false),
-		}, 
-		UciOptionConfig::Check {
-			name: String::from("Testing"),
-			default: Some(true),
-		},
-		UciOptionConfig::Spin {
-			name: String::from("Test2"),
-			default: Some(123),
-			min: Some(0),
-			max: Some(1337),
-		}
-	];
+	//Build engine
+	let mut engine = Engine::init();
 
 	//Generate option values from option list
-	let mut option_values = convert_to_values(&options);
+	let options = engine.get_options();
 
 	//Send available options
 	send_options(&options);
@@ -89,36 +54,20 @@ fn uci_control(uci_rx: mpsc::Receiver<UciMessage>) {
 		match msg {
 			UciMessage::IsReady => break,
 			UciMessage::SetOption { name, value } => {
-				//println!("Got set option");
-				let option = find_mut_option(&mut option_values, name);
-				match option {
-					Some(i) => {
-						//println!("Found option");
-						match i {
-							OptionValue::Check{ ref mut val, .. } => {
-								*val = match value.unwrap_or(String::from("")).as_ref() {
-									"true" => true,
-									"false" => false,
-									_ => false
-								};
-							},
-							OptionValue::Spin{ ref mut val, .. } => {
-								*val = value.unwrap_or(String::from("0")).parse::<i64>().unwrap();
-							},
-							_ => println!("Option type not supported")
-						}
-					}
-					None => ()//println!("Didnt find option")
-				}
+				println!("Got set option");
+				engine.set_option(name, value);
 			},
 			UciMessage::Quit => std::process::exit(0),
 			_ => ()
 		}
 	}
 
-	println!("info string Option Values: {:?}", option_values);
+	if !engine.init_ttable() {
+		println!("info Failed to init transposition table. Exiting!");
+		std::process::exit(10);
+	}
 
-	let _engine = Engine::init(option_values);
+	engine.print_options();
 
 	send_uci_message(UciMessage::ReadyOk);
 
@@ -151,41 +100,14 @@ fn send_uci_id() {
 	send_uci_message(author);
 }
 
-fn send_options(opts: &Vec<UciOptionConfig>) {
-	for option in opts.iter() {
-		let tmp = option.clone();
-		send_uci_message(UciMessage::Option(tmp));
+fn send_options(opts: &HashMap<String,UciOptionConfig>) {
+	for (_key, val) in opts.iter() {
+		println!("{}", *val);
 	}
 }
 
 fn send_uci_message(msg: UciMessage) {
 	println!("{}", msg);
-}
-
-fn convert_to_values(opts: &Vec<UciOptionConfig>) -> Vec<OptionValue> {
-	let mut vals = Vec::new();
-	for option in opts.iter() {
-		match option {
-			UciOptionConfig::Check { name, default} => {
-				vals.push(
-					OptionValue::Check {
-						name: name.to_string(),
-						val: default.unwrap_or(false)
-					}
-				);
-			},
-			UciOptionConfig::Spin { name, default, ..} => {
-				vals.push(
-					OptionValue::Spin {
-						name: name.to_string(),
-						val: default.unwrap_or(0)
-					}
-				);
-			},
-			_ => todo!(),
-		}
-	}
-	vals
 }
 
 fn get_message_blocking(uci_rx:&mpsc::Receiver<UciMessage>) -> Option<UciMessage> {
