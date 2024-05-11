@@ -311,15 +311,61 @@ fn setupbbs(state: &mut State) {
   state.side_bbs[1] = 0xFFFF000000000000;
 }
 
-pub fn find_option(options:&Vec<OptionValue>) -> Option<&OptionValue> {
+pub fn find_option(options:&Vec<OptionValue>, oname: String) -> Option<&OptionValue> {
   options.iter().find( |&opt|
     match opt {
       OptionValue::Spin{ name, ..} => {
-        if name == "Hash" {
+        if *name == oname {
          true 
         } else {
           false
         }},
+      OptionValue::Check{ name, ..} => {
+        if *name == oname {
+         true 
+        } else {
+          false
+        }}
+      _ => false
+    }
+  )
+}
+
+pub fn find_mut_option(options:&mut Vec<OptionValue>, oname: String) -> Option<&mut OptionValue> {
+  options.iter_mut().find( |opt|
+    match opt {
+      OptionValue::Spin{ name, ..} => {
+        if *name == oname {
+         true 
+        } else {
+          false
+        }},
+      OptionValue::Check{ name, ..} => {
+        if *name == oname {
+         true 
+        } else {
+          false
+        }}
+      _ => false
+    }
+  )
+}
+
+pub fn locate_option(options:&Vec<OptionValue>, oname: String) -> Option<usize> {
+  options.iter().position( |opt|
+    match opt {
+      OptionValue::Spin{ name, ..} => {
+        if *name == oname {
+         true 
+        } else {
+          false
+        }},
+      OptionValue::Check{ name, ..} => {
+        if *name == oname {
+         true 
+        } else {
+          false
+        }}
       _ => false
     }
   )
