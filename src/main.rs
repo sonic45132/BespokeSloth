@@ -22,7 +22,8 @@ extern crate vampirc_uci;
 
 fn main() {
 
-	setup_uci();
+	let uci_rx = setup_uci();
+	uci_control(uci_rx);
 	std::process::exit(1);
 
 	// let zkeys = generate_keys(0xDEADBEEF);
