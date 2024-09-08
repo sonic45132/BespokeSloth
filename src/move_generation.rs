@@ -12,7 +12,7 @@ pub fn generate_moves(state: &State, side: u8) -> Vec<Move> {
 
 		//Generate all possible piece moves.
 		match square&0b00111 {
-			Pieces::PAWN => moves.extend(pawn_moves(&state.board, side, i as u8)),
+			Pieces::PAWN => moves.extend(pawn_moves(&state.board, side, i as i32)),
 			Pieces::KING => {
 				moves.extend(king_moves(state, side, i as u8));
 				//in_check = is_in_check(&state.board, side, i as u8);
@@ -37,52 +37,45 @@ pub fn generate_moves(state: &State, side: u8) -> Vec<Move> {
 
 //TODO: Look into cleaning this up and en passant
 //TODO: Add in promotion here or during the make move
-fn pawn_moves(board: &[u8;64], side: u8, loc: u8) -> Vec<Move> {
-
-	let cur_pos = loc as i32;
+fn pawn_moves(board: &[u8;64], side: u8, loc: i32) -> Vec<Move> {
 
 	let mut moves: Vec<Move> = Vec::new();
 
 	
-	let offset;
+	let target: usize;
 
 	if side == Pieces::WHITE {
-		offset = 8;
+		if loc + 8 > 63 { return moves; }
+		target = (loc+8) as usize;
 	} else {
-		offset = -8;
+		if loc - 8 < 0 { return moves; }
+		target = (loc-8) as usize;
 	}
-
-	let target = cur_pos+offset;
-
-	if target > 63 || target < 0 {
-		return moves;
-	}
-
-	let index = target as usize;
 
 	//Generate normal pawn move 1 space
-	if board[index] == 0 {
+	if board[target] == 0 {
 		moves.push(Move {
 			start: loc as u8,
-			target: (cur_pos+offset) as u8,
+			target: target as u8,
 			castle: 0
 		});
 
 		//Generate starting pawn move of 2 spaces if on correct rank
-		let index2 = (cur_pos+(offset*2)) as usize;
 		if side == Pieces::WHITE {
-			if loc/8 == 1 && board[index2] == 0 {
+			let target2: usize = target + 8;
+			if loc/8 == 1 && board[target2] == 0 {
 				moves.push(Move {
 					start: loc as u8,
-					target: (cur_pos+(offset*2)) as u8,
+					target: target2 as u8,
 					castle: 0
 				});
 			}
 		} else {
-			if loc/8 == 6 && board[index2] == 0 {
+			let target2: usize = target - 8;
+			if loc/8 == 6 && board[target2] == 0 {
 				moves.push(Move {
 					start: loc as u8,
-					target: (cur_pos+(offset*2)) as u8,
+					target: target2 as u8,
 					castle: 0
 				});
 			} else {
@@ -91,21 +84,21 @@ fn pawn_moves(board: &[u8;64], side: u8, loc: u8) -> Vec<Move> {
 	}
 
 	//Check for capture moves one left and one right of the square ahead
-	if index != 0 && index/8 == (index-1)/8 {
-		if board[index-1] != 0 && board[index-1]&side == 0 {
+	if target != 0 && target/8 == (target-1)/8 {
+		if board[target-1] != 0 && board[target-1]&side == 0 {
 			moves.push(Move {
 				start: loc as u8,
-				target: (index-1) as u8,
+				target: (target-1) as u8,
 				castle: 0
 			});
 		}
 	}
 
-	if index/8 == (index+1)/8 && (index+1) < 64{
-		if board[index+1] != 0  && board[index+1]&side == 0{
+	if target/8 == (target+1)/8 && (target+1) < 64{
+		if board[target+1] != 0  && board[target+1]&side == 0{
 			moves.push(Move {
 				start: loc as u8,
-				target: (index+1) as u8,
+				target: (target+1) as u8,
 				castle: 0
 			});
 		}
