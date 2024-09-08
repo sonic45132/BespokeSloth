@@ -35,6 +35,19 @@ pub fn parse_fen(input: &str) -> State {
 
   if parts[2] == "-" {
     state.castle = 0;
+  } else {
+    let mut castle: u8 = 0;
+    for c in parts[2].chars() {
+      println!("{:?}", c);
+      match c {
+        'K' => castle |= 0b1000,
+        'Q' => castle |= 0b0100,
+        'k' => castle |= 0b0010,
+        'q' => castle |= 0b0001,
+        _ => (),
+      }
+    }
+    state.castle = castle;
   }
 
   state.moves_made = parts[5].parse::<u32>().unwrap();
