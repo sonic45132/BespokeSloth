@@ -20,21 +20,17 @@ extern crate vampirc_uci;
 
 //use helpers::*;
 
-fn main() {
-
+//Main function for use in UCI mode
+fn main_uci() {
 	let uci_rx = setup_uci();
 	uci_control(uci_rx);
 	std::process::exit(1);
+}
 
-	// let zkeys = generate_keys(0xDEADBEEF);
-
-	// if read_line() != "start" {
-	// 	std::process::exit(1);
-	// }
-
-	// let starting = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-
-	// let mut state = parse_fen(starting);
+//Main function for use in testing
+fn main_alt() {
+	let starting = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+	let _state = helpers::parse_fen(starting);
 
 	// let mut side = Pieces::WHITE;
 
@@ -56,8 +52,17 @@ fn main() {
 	// 	println!("{:?}",to_alg(&best_move));
 	// 	state = make_move(&state, best_move, state.to_move);
 	// }
-	
 
 	//let mut t_table: [TEntry; 2^24];
+}
 
+fn main() {
+	// let zkeys = generate_keys(0xDEADBEEF);
+
+	//Determine which engine mode to use
+	if helpers::read_line() == "uci" {
+	 	main_uci();
+	} else {
+		main_alt();
+	}
 }

@@ -31,9 +31,6 @@ pub fn setup_uci() -> mpsc::Receiver<UciMessage>{
 
 pub fn uci_control(uci_rx: mpsc::Receiver<UciMessage>) {
 
-	//Wait for start uci message
-	wait_for_uci(&uci_rx);
-
 	//Send engine id info
 	send_uci_id();
 
@@ -77,18 +74,6 @@ pub fn uci_control(uci_rx: mpsc::Receiver<UciMessage>) {
 			UciMessage::Quit => std::process::exit(0),
 			_ => ()
 		}
-	}
-}
-
-//Waits forever for start UCI message
-fn wait_for_uci(uci_rx:&mpsc::Receiver<UciMessage>) {
-	loop {
-		let message = get_message_blocking(&uci_rx).unwrap();
-
-		match message {
-			UciMessage::Uci => break,
-			_ => continue
-		};
 	}
 }
 
