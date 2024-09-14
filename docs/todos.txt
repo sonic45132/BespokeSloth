@@ -1,0 +1,18 @@
+- Move game loop logic to main function
+
+- Check over castleing
+
+- Implement promotion
+  - Move struct needs to include what piece to change to
+
+
+- Implement a make/undo move with stack
+
+- Implement En Passent
+
+- Create benchmarks with Criterion
+  - Move generation
+
+- Create tests
+  - Move generation
+  - Searching

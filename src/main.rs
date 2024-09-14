@@ -22,9 +22,9 @@ extern crate vampirc_uci;
 
 //Main function for use in UCI mode
 fn main_uci() {
-	let uci_rx = setup_uci();
+	let uci_rx = setup_uci_parser();
 	uci_control(uci_rx);
-	std::process::exit(1);
+	std::process::exit(0);
 }
 
 //Main function for use in testing

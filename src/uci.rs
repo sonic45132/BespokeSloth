@@ -15,7 +15,7 @@ pub enum OptionValue {
 }
 
 //Sets up channels for passing data between control and compute threads.
-pub fn setup_uci() -> mpsc::Receiver<UciMessage>{
+pub fn setup_uci_parser() -> mpsc::Receiver<UciMessage>{
 	let (uci_tx, uci_rx) = mpsc::channel::<UciMessage>();
 
 	thread::spawn(move || {
