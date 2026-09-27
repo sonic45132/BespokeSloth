@@ -1,5 +1,4 @@
-use rand::rngs::StdRng;
-use rand::prelude::*;
+use rand::*;
 use crate::constants::*;
 
 
@@ -7,10 +6,10 @@ pub fn generate_keys(seed: u64) -> [u64; 781] {
 
   let mut keys = [0; 781];
 
-  let mut rng = StdRng::seed_from_u64(seed);
+  let mut rng = rand::rngs::StdRng::seed_from_u64(seed);
 
   for n in 0..781 {
-    keys[n] = rng.gen();
+    keys[n] = rng.random::<u64>();
     println!("{:?}", keys[n]);
   }
 

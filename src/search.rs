@@ -1,5 +1,5 @@
 //use std::cmp;
-use rand::Rng;
+use rand::*;
 use crate::constants::State;
 use crate::constants::Pieces;
 use crate::constants::Move;
@@ -40,8 +40,8 @@ pub fn negamax(state: &State, side: u8, depth: u32) -> Move {
   }
 
   if best_moves.len() != 1 {
-    let mut rng = rand::thread_rng();
-    return best_moves[rng.gen_range(0..best_moves.len())];
+    let mut rng = rand::rng();
+    return best_moves[rng.random_range(0..best_moves.len())];
   } else {
     return best_moves[0];
   }
